@@ -7,7 +7,7 @@ export async function GET() {
   try {
     await requireUser();
     const key = (process.env.PAYMENKU_API_KEY || "").trim();
-    const base = (process.env.PAYMENKU_BASE_URL || "https://api.paymenku.com/v1").replace(/\\/$/, "");
+    const base = (process.env.PAYMENKU_BASE_URL || "https://api.paymenku.com/v1").replace(/\/$/, "");
     return NextResponse.json({
       configured: Boolean(key),
       baseUrl: base,
