@@ -50,6 +50,7 @@ model Tier {
   description   String
   price         Int
   active        Boolean        @default(true)
+  color         String         @default("#d98bb3")
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   contents      Content[]
@@ -64,6 +65,7 @@ model Content {
   type        ContentType
   url         String
   thumbnail   String?
+  published   Boolean     @default(true)
   tierId      String
   tier        Tier        @relation(fields: [tierId], references: [id], onDelete: Cascade)
   createdAt   DateTime    @default(now())

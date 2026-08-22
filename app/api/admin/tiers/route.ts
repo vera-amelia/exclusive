@@ -8,7 +8,7 @@ export async function GET() {
 
     const tiers = await prisma.tier.findMany({
       orderBy: {
-        sortOrder: "asc",
+        level: "asc",
       },
       include: {
         _count: {
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         slug: b.slug,
         description: b.description || "",
         price: Number(b.price),
-        sortOrder: Number(b.sortOrder),
+        level: Number(b.level),
         color: b.color || "#d98bb3",
       },
     });
