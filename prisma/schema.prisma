@@ -49,6 +49,7 @@ model Tier {
   level         Int            @unique
   description   String
   price         Int
+  color         String      @default("#d98bb3")
   active        Boolean        @default(true)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -95,7 +96,10 @@ model Order {
   status        PaymentStatus @default(PENDING)
   referenceId   String        @unique
   paymentId     String?
+  providerTrxId String?
   paymentUrl    String?
+  qrString      String?
+  rawResponse   Json?
   idempotencyKey String?      @unique
   paidAt        DateTime?
   createdAt     DateTime      @default(now())
