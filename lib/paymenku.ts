@@ -1,4 +1,4 @@
-const DEFAULT_BASE_URL = "https://api.paymenku.com/v1";
+const DEFAULT_BASE_URL = "https://paymenku.com/api/v1";
 const DEFAULT_QRIS_CHANNEL = "qris";
 const REQUEST_TIMEOUT_MS = 15_000;
 
@@ -63,6 +63,8 @@ export async function createPaymenkuTransaction(input: {
   referenceId: string;
   amount: number;
   customerName: string;
+  customerEmail: string;
+  returnUrl: string;
   channelCode?: string;
 }) {
   const key = getApiKey();
@@ -81,6 +83,8 @@ export async function createPaymenkuTransaction(input: {
       amount: Math.round(input.amount),
       reference_id: input.referenceId,
       customer_name: input.customerName,
+      customer_email: input.customerEmail,
+      return_url: input.returnUrl,
     }),
   });
 
@@ -127,3 +131,5 @@ export function isPaidStatus(status: string) {
 export function isFailedStatus(status: string) {
   return ["FAILED", "FAILURE", "CANCELLED", "CANCELED", "EXPIRED", "VOID"].includes(status.toUpperCase());
 }
+
+

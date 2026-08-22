@@ -66,6 +66,8 @@ if (channelCode !== "qris")
         referenceId: order.referenceId,
         amount: tier.price,
         customerName: user.name,
+        customerEmail: user.email,
+        returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/payment/${order.id}`,
         channelCode,
       });
       const fields = paymentFields(trx);
@@ -103,3 +105,4 @@ if (channelCode !== "qris")
     return errorResponse(error);
   }
 }
+
