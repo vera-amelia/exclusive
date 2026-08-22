@@ -1,4 +1,4 @@
-const baseUrl = (process.env.PAYMENKU_BASE_URL || "https://api.paymenku.com/v1").replace(/\/$/, "");
+const baseUrl = (process.env.PAYMENKU_BASE_URL || "https://api.paymenku.com/v1").trim().replace(/\/$/, "");
 
 function unwrap(data: any) {
   return data?.data ?? data;
@@ -10,7 +10,7 @@ export async function createPaymenkuTransaction(input: {
   customerName: string;
   channelCode?: string;
 }) {
-  const key = process.env.PAYMENKU_API_KEY;
+  const key = (process.env.PAYMENKU_API_KEY || "").trim();
   if (!key) throw new Error("PAYMENKU_API_KEY belum diatur di Railway");
 
   const res = await fetch(`${baseUrl}/transaction/create`, {
@@ -21,7 +21,7 @@ export async function createPaymenkuTransaction(input: {
       "Idempotency-Key": input.referenceId,
     },
     body: JSON.stringify({
-      channel_code: input.channelCode || "qris3",
+      channel_code: input.channelCode || process.env.PAYMENKU_CHANNEL_CODE || "qris3",
       amount: input.amount,
       reference_id: input.referenceId,
       customer_name: input.customerName,
@@ -35,13 +35,13 @@ export async function createPaymenkuTransaction(input: {
 
   if (!res.ok || data?.status === "error" || data?.success === false) {
     const message = data?.message || data?.error || data?.data?.message || `Paymenku HTTP ${res.status}`;
-    throw new Error(message);
+    throw new Error(`Paymenku: ${message}`);
   }
   return data;
 }
 
 export async function getPaymenkuTransaction(trxId: string) {
-  const key = process.env.PAYMENKU_API_KEY;
+  const key = (process.env.PAYMENKU_API_KEY || "").trim();
   if (!key) throw new Error("PAYMENKU_API_KEY belum diatur di Railway");
   const res = await fetch(`${baseUrl}/transaction/${encodeURIComponent(trxId)}`, {
     headers: { Authorization: `Bearer ${key}` },

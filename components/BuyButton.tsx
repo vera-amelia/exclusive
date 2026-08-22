@@ -19,7 +19,7 @@ export default function BuyButton({ tierId }: { tierId: string }) {
       if (d.paymentUrl) window.location.href = d.paymentUrl;
       else router.push(`/payment/${d.orderId}`);
     } catch (e: any) {
-      alert(e?.message || 'Gagal membuat pembayaran');
+      alert(e?.message || 'Gagal membuat pembayaran. Silakan coba lagi.');
       setLoading(false);
     }
   }}>{loading ? 'Menghubungkan Paymenku...' : 'Bayar dengan Paymenku'}</button>;

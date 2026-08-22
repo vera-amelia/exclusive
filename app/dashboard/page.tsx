@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 import { getEffectiveTierOrder } from "@/lib/access";
 import { dateId } from "@/lib/format";
+import BuyButton from "@/components/BuyButton";
 
 export default async function Dashboard() {
   const user = await getSessionUser();
@@ -141,19 +142,11 @@ export default async function Dashboard() {
               tier.level <= effective;
 
             return (
-              <Link
-                href={
-                  unlocked
-                    ? `/dashboard/level/${tier.slug}`
-                    : "#"
-                }
-                key={tier.id}
-                style={{
-                  pointerEvents: unlocked
-                    ? "auto"
-                    : "none",
-                }}
-              >
+              <div key={tier.id}>
+                <Link
+                  href={unlocked ? `/dashboard/level/${tier.slug}` : "#"}
+                  style={{ pointerEvents: unlocked ? "auto" : "none", display: "block" }}
+                >
                 <article
                   className="shadow-soft"
                   style={{
@@ -206,7 +199,13 @@ export default async function Dashboard() {
                     </p>
                   </div>
                 </article>
-              </Link>
+                </Link>
+                {!unlocked && (
+                  <div style={{ marginTop: 10 }}>
+                    <BuyButton tierId={tier.id} />
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
