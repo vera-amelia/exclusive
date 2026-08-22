@@ -18,10 +18,15 @@ export async function POST(req: Request) {
     const user = await requireUser();
     const body = await req.json().catch(() => ({}));
     const tierId = typeof body.tierId === "string" ? body.tierId.trim() : "";
-    const channelCode = typeof body.channelCode === "string" ? body.channelCode.trim() : "qris3";
+    const channelCode = typeof body.channelCode === "string"
+  ? body.channelCode.trim()
+  : "qris";
 
-    if (!tierId) return NextResponse.json({ error: "tierId wajib diisi" }, { status: 400 });
-    if (channelCode !== "qris3") return NextResponse.json({ error: "Untuk QRIS gunakan channel_code qris3" }, { status: 400 });
+if (channelCode !== "qris")
+  return NextResponse.json(
+    { error: "Untuk QRIS gunakan channel_code qris" },
+    { status: 400 }
+  );
 
     const tier = await prisma.tier.findUnique({ where: { id: tierId } });
     if (!tier || !tier.active) return NextResponse.json({ error: "Level tidak tersedia" }, { status: 404 });

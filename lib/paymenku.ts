@@ -1,5 +1,5 @@
 const DEFAULT_BASE_URL = "https://api.paymenku.com/v1";
-const DEFAULT_QRIS_CHANNEL = "qris3";
+const DEFAULT_QRIS_CHANNEL = "qris";
 const REQUEST_TIMEOUT_MS = 15_000;
 
 function getBaseUrl() {

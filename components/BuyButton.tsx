@@ -47,7 +47,7 @@ export default function BuyButton({
             },
             body: JSON.stringify({
               tierId,
-              channelCode: 'qris3',
+              channelCode: 'qris',
             }),
             cache: 'no-store',
           });
