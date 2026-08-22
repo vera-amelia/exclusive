@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       referenceId,
       amount: tier.price,
       customerName: user.name,
-      channelCode: channelCode || "qris3",
+      channelCode: channelCode || "qris",
     });
     const fields = paymentFields(trx);
 

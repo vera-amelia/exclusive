@@ -21,7 +21,7 @@ export async function createPaymenkuTransaction(input: {
       "Idempotency-Key": input.referenceId,
     },
     body: JSON.stringify({
-      channel_code: input.channelCode || process.env.PAYMENKU_CHANNEL_CODE || "qris3",
+      channel_code: input.channelCode || process.env.PAYMENKU_CHANNEL_CODE || "qris",
       amount: input.amount,
       reference_id: input.referenceId,
       customer_name: input.customerName,

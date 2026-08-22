@@ -13,7 +13,7 @@ export default function BuyButton({ tierId, label = 'Bayar dengan Paymenku' }: {
         const r = await fetch('/api/payments/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tierId, channelCode: 'qris3' })
+          body: JSON.stringify({ tierId, channelCode: 'qris' })
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || 'Gagal membuat pembayaran Paymenku');
