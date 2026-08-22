@@ -14,10 +14,11 @@ export async function GET() {
       baseUrl: base,
       apiKeyPresent: Boolean(key),
       apiKeyPrefix: key ? key.slice(0, 8) + "…" : null,
-      defaultChannel: process.env.PAYMENKU_CHANNEL_CODE || "qris3",
+      defaultChannel: process.env.PAYMENKU_CHANNEL_CODE || "qris",
       webhookSecretPresent: Boolean((process.env.PAYMENKU_WEBHOOK_SECRET || "").trim()),
     });
   } catch (e:any) {
     return NextResponse.json({ error: e?.message || "UNAUTHORIZED" }, { status: e?.message === "UNAUTHORIZED" ? 401 : 400 });
   }
 }
+
