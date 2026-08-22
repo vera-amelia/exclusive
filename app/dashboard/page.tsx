@@ -120,7 +120,7 @@ export default async function Dashboard() {
                 color: "#8c7c85",
               }}
             >
-              Aktif sampai {dateId(subs[0].expiresAt)}
+              Aktif sampai {subs[0].expiresAt ? dateId(subs[0].expiresAt) : 'Tidak ditentukan'}
             </div>
           )}
         </div>
