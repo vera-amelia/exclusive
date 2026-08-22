@@ -11,17 +11,38 @@ export default function PaymentPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let alive = true;
     let timer: ReturnType<typeof setInterval> | undefined;
+
     const load = async () => {
-      const r = await fetch(`/api/payments/status?orderId=${encodeURIComponent(id)}`, { cache: "no-store" });
-      const d = await r.json();
-      if (!r.ok) { setError(d.error || "Gagal memuat pembayaran"); return; }
-      setOrder(d);
-      if ((d.status === "PAID" || d.status === "FAILED" || d.status === "EXPIRED") && timer) clearInterval(timer);
+      try {
+        const r = await fetch(`/api/payments/status?orderId=${encodeURIComponent(id)}`, {
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+        });
+        const text = await r.text();
+        let d: any = {};
+        try { d = text ? JSON.parse(text) : {}; } catch { d = { error: text || `HTTP ${r.status}` }; }
+        if (!alive) return;
+
+        if (!r.ok) {
+          if (!order) setError(d.error || "Gagal memuat pembayaran");
+          return;
+        }
+        setError("");
+        setOrder(d);
+        if (["PAID", "FAILED", "EXPIRED"].includes(d.status) && timer) clearInterval(timer);
+      } catch (e: any) {
+        if (alive && !order) setError(e?.message || "Gagal memuat pembayaran");
+      }
     };
+
     load();
     timer = setInterval(load, 5000);
-    return () => { if (timer) clearInterval(timer); };
+    return () => {
+      alive = false;
+      if (timer) clearInterval(timer);
+    };
   }, [id]);
 
   if (error) return <><Header /><main className="container" style={{padding:"60px 0"}}><div className="glass" style={{padding:28,borderRadius:22}}><h1 className="serif">Pembayaran</h1><p>{error}</p><Link className="btn btn-ghost" href="/">Kembali</Link></div></main></>;
@@ -34,6 +55,7 @@ export default function PaymentPage() {
       <p style={{color:"#8b7c84"}}>Reference: {order.referenceId || id}</p>
       <div style={{fontSize:28,fontWeight:800,color:"#c56f98",margin:"20px 0"}}>{order.amount ? rupiah(order.amount) : ""}</div>
       <div className="badge" style={{marginBottom:18}}>Status: {order.status}</div>
+      {order.providerError && order.status === "PENDING" && <p style={{fontSize:13,color:"#8b7c84"}}>Menunggu respons Paymenku…</p>}
       {order.qrString && <div style={{padding:16,background:"#fff",borderRadius:18,margin:"0 auto 18px",maxWidth:330}}><div style={{fontWeight:700,marginBottom:8}}>QRIS Paymenku</div><div style={{fontSize:12,wordBreak:"break-all",color:"#777"}}>{order.qrString}</div></div>}
       {order.paymentUrl && <a className="btn btn-primary" href={order.paymentUrl} target="_blank" rel="noreferrer">Buka Halaman Pembayaran Paymenku</a>}
       {order.status === "PAID" && <p style={{fontWeight:700,color:"#2f8a5b",marginTop:18}}>Pembayaran berhasil. Akses membership sudah diaktifkan.</p>}

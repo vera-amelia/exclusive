@@ -8,19 +8,27 @@ export default function BuyButton({ tierId, label = 'Bayar dengan Paymenku' }: {
 
   return (
     <button className="buy-button" disabled={loading} onClick={async () => {
+      if (loading) return;
       setLoading(true);
       try {
         const r = await fetch('/api/payments/create', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tierId, channelCode: 'qris' })
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ tierId, channelCode: 'qris3' }),
+          cache: 'no-store',
         });
-        const d = await r.json();
-        if (!r.ok) throw new Error(d.error || 'Gagal membuat pembayaran Paymenku');
-        if (d.paymentUrl) window.location.href = d.paymentUrl;
-        else router.push(`/payment/${d.orderId}`);
+
+        const text = await r.text();
+        let d: any = {};
+        try { d = text ? JSON.parse(text) : {}; } catch { d = { error: text || `HTTP ${r.status}` }; }
+        if (!r.ok) throw new Error(d.error || `Gagal membuat pembayaran (HTTP ${r.status})`);
+
+        router.push(`/payment/${d.orderId}`);
       } catch (e: any) {
-        alert(e?.message || 'Gagal membuat pembayaran. Silakan coba lagi.');
+        const message = e?.message === 'Failed to fetch'
+          ? 'Server pembayaran tidak dapat dihubungi. Cek Railway Deploy Logs dan pastikan domain HTTPS aktif.'
+          : (e?.message || 'Gagal membuat pembayaran. Silakan coba lagi.');
+        alert(message);
         setLoading(false);
       }
     }}>
