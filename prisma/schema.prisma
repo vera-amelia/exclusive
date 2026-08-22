@@ -50,7 +50,6 @@ model Tier {
   description   String
   price         Int
   active        Boolean        @default(true)
-  color         String         @default("#d98bb3")
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   contents      Content[]
@@ -94,6 +93,7 @@ model Order {
   tierId        String
   amount        Int
   status        PaymentStatus @default(PENDING)
+  referenceId   String        @unique
   paymentId     String?
   paymentUrl    String?
   idempotencyKey String?      @unique
