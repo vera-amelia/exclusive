@@ -65,6 +65,7 @@ The exact webhook signature header should be confirmed against the merchant acco
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
+- Optional fallback: `CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>`
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD`
 

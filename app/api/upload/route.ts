@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
-import { v2 as cloudinary } from 'cloudinary';
+import { configureCloudinary, cloudinary } from '@/lib/cloudinary-server';
 
 export const runtime = 'nodejs';
-cloudinary.config({ cloud_name: process.env.CLOUDINARY_CLOUD_NAME, api_key: process.env.CLOUDINARY_API_KEY, api_secret: process.env.CLOUDINARY_API_SECRET });
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
     await requireAdmin();
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.CLOUDINARY_API_KEY;
-    const apiSecret = process.env.CLOUDINARY_API_SECRET;
-    if (!cloudName || !apiKey || !apiSecret) return NextResponse.json({ error: 'Cloudinary belum dikonfigurasi. Isi CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, dan CLOUDINARY_API_SECRET di Railway.' }, { status: 503 });
+    const config = configureCloudinary();
+    if (!config) return NextResponse.json({ error: 'Cloudinary belum dikonfigurasi pada runtime Railway. Pastikan CLOUDINARY_* ada di vera-amelia-web.' }, { status: 503 });
     const form = await req.formData();
     const file = form.get('file');
     if (!(file instanceof File)) return NextResponse.json({ error: 'File tidak ditemukan' }, { status: 400 });
