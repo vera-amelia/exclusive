@@ -175,7 +175,7 @@ export default async function Dashboard() {
                       fontSize: 40,
                     }}
                   >
-                    {unlocked ? "✦" : "🔒"}
+                    {unlocked ? "✦" : "LOCKED"}
                   </div>
 
                   <div style={{ padding: 17 }}>
