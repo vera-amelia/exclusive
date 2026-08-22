@@ -1,0 +1,3 @@
+'use client';
+import {useState} from 'react';
+export default function BuyButton({tierId}:{tierId:string}){const [loading,setLoading]=useState(false);return <button className="btn btn-primary" disabled={loading} onClick={async()=>{setLoading(true);const r=await fetch('/api/payments/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tierId})});const d=await r.json();if(!r.ok){alert(d.error||'Gagal membuat pembayaran');setLoading(false);return}if(d.paymentUrl)location.href=d.paymentUrl;else alert('Transaksi dibuat. Cek detail pembayaran di dashboard.');setLoading(false)}}>{loading?'Memproses...':'Beli Sekarang'}</button>}
