@@ -1,4 +1,29 @@
-import {NextResponse} from 'next/server';import {requireAdmin} from '@/lib/auth';import {v2 as cloudinary} from 'cloudinary';
-export const runtime='nodejs';
-cloudinary.config({cloud_name:process.env.CLOUDINARY_CLOUD_NAME,api_key:process.env.CLOUDINARY_API_KEY,api_secret:process.env.CLOUDINARY_API_SECRET});
-export async function POST(req:Request){try{await requireAdmin();if(!process.env.CLOUDINARY_CLOUD_NAME)return NextResponse.json({error:'Cloudinary belum dikonfigurasi. Isi CLOUDINARY_* di Railway.'},{status:503});const form=await req.formData();const file=form.get('file');if(!(file instanceof File))return NextResponse.json({error:'File tidak ditemukan'},{status:400});if(file.size>200*1024*1024)return NextResponse.json({error:'Maksimum 200MB per file'},{status:413});const buffer=Buffer.from(await file.arrayBuffer());const resourceType=file.type.startsWith('video/')?'video':'image';const result:any=await new Promise((resolve,reject)=>{const stream=cloudinary.uploader.upload_stream({folder:'vera-amelia',resource_type:resourceType},(err,res)=>err?reject(err):resolve(res));stream.end(buffer)});return NextResponse.json({url:result.secure_url,publicId:result.public_id,type:resourceType})}catch(e:any){return NextResponse.json({error:e.message||'Upload gagal'},{status:400})}}
+import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth';
+import { v2 as cloudinary } from 'cloudinary';
+
+export const runtime = 'nodejs';
+cloudinary.config({ cloud_name: process.env.CLOUDINARY_CLOUD_NAME, api_key: process.env.CLOUDINARY_API_KEY, api_secret: process.env.CLOUDINARY_API_SECRET });
+
+export async function POST(req: Request) {
+  try {
+    await requireAdmin();
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    if (!cloudName || !apiKey || !apiSecret) return NextResponse.json({ error: 'Cloudinary belum dikonfigurasi. Isi CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, dan CLOUDINARY_API_SECRET di Railway.' }, { status: 503 });
+    const form = await req.formData();
+    const file = form.get('file');
+    if (!(file instanceof File)) return NextResponse.json({ error: 'File tidak ditemukan' }, { status: 400 });
+    if (file.size > 100 * 1024 * 1024) return NextResponse.json({ error: 'Maksimum upload langsung 100MB. Untuk video lebih besar gunakan URL media.' }, { status: 413 });
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
+    const result: any = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream({ folder: 'vera-amelia', resource_type: resourceType }, (err, res) => err ? reject(err) : resolve(res));
+      stream.end(buffer);
+    });
+    return NextResponse.json({ url: result.secure_url, publicId: result.public_id, type: resourceType });
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || 'Upload gagal' }, { status: 400 });
+  }
+}
