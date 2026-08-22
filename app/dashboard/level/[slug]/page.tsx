@@ -1,2 +1,36 @@
-import {redirect} from 'next/navigation';import Header from '@/components/Header';import {getSessionUser} from '@/lib/auth';import {canAccessTier} from '@/lib/access';import {prisma} from '@/lib/prisma';import {dateId} from '@/lib/format';
-export default async function LevelPage({params}:{params:Promise<{slug:string}>}){const user=await getSessionUser();if(!user)redirect('/login');const {slug}=await params;const tier=await prisma.tier.findUnique({where:{slug},include:{contents:{where:{published:true},orderBy:{createdAt:'desc'}}}});if(!tier)return <div className="container" style={{padding:50}}>Level tidak ditemukan.</div>;if(!(await canAccessTier(user.id,tier.level)))redirect('/dashboard');return <><Header/><main className="container" style={{padding:'34px 0 70px'}}><div style={{marginBottom:25}}><div className="badge">LEVEL {tier.level}</div><h1 className="serif" style={{fontSize:42,margin:'10px 0'}}>{tier.name}</h1><p style={{color:'#8b7b84'}}>{tier.description}</p></div>{tier.contents.length===0?<div className="glass" style={{padding:30,borderRadius:22,textAlign:'center'}}>Belum ada konten di level ini.</div>:<div className="grid-cards">{tier.contents.map(c=><article key={c.id} style={{background:'#fff',borderRadius:20,overflow:'hidden',boxShadow:'0 16px 40px rgba(177,105,139,.10)'}}>{c.type==='IMAGE'?<img src={c.url} alt={c.title} style={{width:'100%',height:240,objectFit:'cover'}}/>:<video src={c.url} controls poster={c.thumbnail||undefined} style={{width:'100%',height:240,objectFit:'cover',background:'#222'}}/>}<div style={{padding:15}}><h3 style={{margin:'0 0 5px'}}>{c.title}</h3>{c.description&&<p style={{fontSize:13,color:'#8c7c85',margin:'0 0 8px'}}>{c.description}</p>}<small style={{color:'#b39ba7'}}>Ditambahkan {dateId(c.createdAt)}</small></div></article>)}</div>}</main></>}
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import Header from '@/components/Header';
+import { getSessionUser } from '@/lib/auth';
+import { canAccessTier } from '@/lib/access';
+import { prisma } from '@/lib/prisma';
+import { dateId } from '@/lib/format';
+
+export default async function LevelPage({ params }: { params: Promise<{ slug: string }> }) {
+  const user = await getSessionUser();
+  if (!user) redirect('/login');
+  const { slug } = await params;
+  const tier = await prisma.tier.findUnique({ where: { slug }, include: { contents: { where: { published: true }, orderBy: { createdAt: 'desc' } } } });
+  if (!tier) return <><Header /><main className="site-shell empty-state">Level tidak ditemukan.</main></>;
+  if (!(await canAccessTier(user.id, tier.level))) redirect('/dashboard');
+
+  return <>
+    <Header />
+    <main className="site-shell content-shell">
+      <Link href="/dashboard" className="back-link"><i className="fas fa-arrow-left" /> Kembali</Link>
+      <section className="content-hero">
+        <span className="section-kicker">LEVEL {tier.level}</span>
+        <h1 className="serif">{tier.name}</h1>
+        <p>{tier.description}</p>
+      </section>
+
+      {tier.contents.length === 0 ? <div className="empty-card"><i className="fas fa-images" /><h2>Belum ada konten</h2><p>Konten untuk level ini akan muncul di sini setelah admin menambahkannya.</p></div> :
+        <div className="content-grid">{tier.contents.map(c => <article key={c.id} className="content-card">
+          <div className="content-media">
+            {c.type === 'IMAGE' ? <img src={c.url} alt={c.title} /> : <video src={c.url} controls poster={c.thumbnail || undefined} />}
+          </div>
+          <div className="content-body"><h3 className="serif">{c.title}</h3>{c.description && <p>{c.description}</p>}<small>Ditambahkan {dateId(c.createdAt)}</small></div>
+        </article>)}</div>}
+    </main>
+  </>;
+}

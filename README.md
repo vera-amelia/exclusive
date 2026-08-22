@@ -38,11 +38,19 @@ Default seeded admin comes from `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
 ## Paymenku
 
-The integration uses Paymenku's REST API endpoint `POST /transaction/create` through the configured `PAYMENKU_BASE_URL`. The project sends Bearer authentication and an `Idempotency-Key`, and stores the returned transaction/payment URL/QR string. Configure Paymenku to call:
+The integration uses Paymenku's REST API endpoint `POST /transaction/create` through the configured `PAYMENKU_BASE_URL` (default `https://api.paymenku.com/v1`). The project sends Bearer authentication and an `Idempotency-Key`, uses QRIS channel `qris3`, and stores the returned transaction/payment URL/QR string. Configure Paymenku to call:
 
 `https://YOUR-DOMAIN/api/payments/webhook`
 
-The exact webhook signature header should be confirmed against the merchant account's current Paymenku dashboard/documentation. This project accepts `x-paymenku-signature`, `x-signature`, or `signature` and verifies HMAC-SHA256 when `PAYMENKU_WEBHOOK_SECRET` is set.
+Paymenku documents HMAC-SHA256 webhook verification. This project accepts `x-paymenku-signature`, `x-signature`, or `signature` and accepts either hexadecimal or base64 HMAC output when `PAYMENKU_WEBHOOK_SECRET` is set.
+
+## Payment flow notes
+
+- QRIS uses Paymenku channel code `qris3` as shown in the current Paymenku API example.
+- The default API base URL is `https://api.paymenku.com/v1`.
+- The create endpoint stores a local PENDING order before calling Paymenku, so a network timeout can be retried with the same idempotency/reference key.
+- Webhook and status polling both activate the subscription idempotently through `Subscription.orderId`.
+- After pulling this version, run `npx prisma db push` (or deploy; the Railway start command already runs it).
 
 ## Railway deployment
 
@@ -60,11 +68,12 @@ The exact webhook signature header should be confirmed against the merchant acco
 - `JWT_SECRET`
 - `NEXT_PUBLIC_APP_URL`
 - `PAYMENKU_API_KEY`
-- `PAYMENKU_BASE_URL=https://paymenku.com/api/v1`
+- `PAYMENKU_BASE_URL=https://api.paymenku.com/v1`
 - `PAYMENKU_WEBHOOK_SECRET`
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
+- Optional fallback: `CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>`
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD`
 

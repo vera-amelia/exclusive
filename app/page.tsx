@@ -1,2 +1,96 @@
-export const dynamic = 'force-dynamic';import Link from 'next/link';import Header from '@/components/Header';import {prisma} from '@/lib/prisma';import {rupiah} from '@/lib/format';import BuyButton from '@/components/BuyButton';
-export default async function Home(){const tiers=await prisma.tier.findMany({where:{active:true},orderBy:{level:'asc'},include:{contents:{where:{published:true},take:1,orderBy:{createdAt:'desc'}}}});return <><Header/><main><section className="container" style={{padding:'42px 0 24px'}}><div className="shadow-soft" style={{borderRadius:30,padding:'58px 28px',textAlign:'center',background:'linear-gradient(135deg,#f3b7cf,#f8dfcf)'}}><div className="badge" style={{background:'rgba(255,255,255,.55)'}}>✦ Exclusive Membership</div><h1 className="serif" style={{fontSize:'clamp(40px,7vw,72px)',lineHeight:1.02,margin:'20px 0 12px',fontStyle:'italic'}}>Vera Amelia<br/>Exclusive Collection</h1><p style={{maxWidth:580,margin:'0 auto 24px',color:'#765e6c',fontSize:17}}>Koleksi foto & video premium yang hanya tersedia untuk member. Pilih level sesuai akses yang kamu inginkan.</p><Link href="#levels" className="btn btn-primary">Lihat Koleksi</Link></div></section><section className="container" style={{padding:'22px 0 70px'}}><div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,margin:'0 auto 42px',maxWidth:620}}>{[['10K+','Member'],['4','Levels'],['24/7','Access']].map(([a,b])=><div key={b} className="glass" style={{borderRadius:20,padding:20,textAlign:'center'}}><b style={{fontSize:22}}>{a}</b><div style={{color:'#9a8992',fontSize:13}}>{b}</div></div>)}</div><h2 id="levels" className="serif" style={{textAlign:'center',fontSize:32,fontStyle:'italic',marginBottom:24}}>Pilih Level Membership</h2><div className="grid-cards">{tiers.map(t=><article key={t.id} className="shadow-soft" style={{background:'#fff',borderRadius:22,overflow:'hidden'}}><div style={{height:170,background:`linear-gradient(135deg,${t.color},#f7d9e5)`,display:'grid',placeItems:'center',color:'#fff'}}><div style={{fontSize:42,fontFamily:'Playfair Display'}}>V</div></div><div style={{padding:18}}><span className="badge">LEVEL {t.level}</span><h3 className="serif" style={{fontSize:23,margin:'12px 0 5px'}}>{t.name.replace(`Level ${t.level} — `,'')}</h3><p style={{color:'#8c7c85',fontSize:14,minHeight:40}}>{t.description}</p><div style={{fontWeight:800,color:'#c86e9b',fontSize:20,margin:'10px 0 14px'}}>{rupiah(t.price)} <small style={{fontSize:12,color:'#a99ba2',fontWeight:500}}>/ 30 hari</small></div><BuyButton tierId={t.id}/></div></article>)}</div></section></main><footer style={{background:'#2d2d3b',color:'#d7d3da',padding:'35px 0'}}><div className="container" style={{textAlign:'center'}}><div className="serif" style={{fontSize:24,fontStyle:'italic'}}>Vera Amelia</div><p style={{fontSize:13,opacity:.7}}>Koleksi Digital Eksklusif • © 2026</p></div></footer></>}
+export const dynamic = 'force-dynamic';
+
+import Link from 'next/link';
+import Header from '@/components/Header';
+import { prisma } from '@/lib/prisma';
+import { rupiah } from '@/lib/format';
+import BuyButton from '@/components/BuyButton';
+
+export default async function Home() {
+  const tiers = await prisma.tier.findMany({
+    where: { active: true },
+    orderBy: { level: 'asc' },
+    include: {
+      contents: {
+        where: { published: true },
+        take: 2,
+        orderBy: { createdAt: 'desc' },
+      },
+    },
+  });
+
+  const publishedCount = await prisma.content.count({ where: { published: true } });
+
+  return (
+    <>
+      <Header />
+      <main className="site-shell">
+        <section className="hero-card">
+          <div className="eyebrow"><i className="fas fa-sparkles" /> Exclusive Collection</div>
+          <h1 className="serif hero-title">Exclusive<br />Collection</h1>
+          <p>Koleksi foto & video premium yang tidak akan kamu temukan di tempat lain.</p>
+          <Link href="#collection" className="hero-cta">Lihat Koleksi</Link>
+        </section>
+
+        <section className="stats-card">
+          <div><strong>4</strong><span>Levels</span></div>
+          <div><strong>{publishedCount || 0}</strong><span>Konten</span></div>
+          <div><strong>24/7</strong><span>Access</span></div>
+        </section>
+
+        <section id="collection" className="collection-section">
+          <div className="section-heading">
+            <span className="section-kicker">MEMBERSHIP</span>
+            <h2 className="serif">Koleksi Eksklusif</h2>
+            <p>Pilih paket yang sesuai dengan akses yang kamu inginkan.</p>
+          </div>
+
+          <div className="product-list">
+            {tiers.map((tier) => {
+              const cover = tier.contents[0]?.thumbnail || tier.contents[0]?.url;
+              const displayName = tier.name.replace(`Level ${tier.level} — `, '');
+              return (
+                <article key={tier.id} className="product-card">
+                  <div className="product-media" style={{ background: `linear-gradient(145deg, ${tier.color}, #f6dce7)` }}>
+                    {cover ? (
+                      <img src={cover} alt="" />
+                    ) : (
+                      <div className="media-placeholder"><span>V</span></div>
+                    )}
+                    <div className="media-overlay" />
+                    <span className="product-badge"><i className="fas fa-star" /> {tier.level === 1 ? 'New Drop' : tier.level === 4 ? 'Limited' : 'Premium'}</span>
+                    <span className="level-chip">LEVEL {tier.level}</span>
+                  </div>
+                  <div className="product-body">
+                    <h3 className="serif">{displayName}</h3>
+                    <p>{tier.description}</p>
+                    <div className="price-row">
+                      <strong>{rupiah(tier.price)}</strong>
+                      <span>/ 30 hari</span>
+                    </div>
+                    <BuyButton tierId={tier.id} label="Beli Sekarang" />
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="trust-row">
+          <span><i className="fas fa-lock" /> Aman</span>
+          <span><i className="fas fa-bolt" /> Instant</span>
+          <span><i className="fas fa-headset" /> Support</span>
+          <span><i className="fas fa-circle-check" /> Garansi</span>
+        </section>
+      </main>
+
+      <footer className="site-footer">
+        <div className="site-shell footer-inner">
+          <div className="serif">Vera Amelia</div>
+          <p>Koleksi Digital Eksklusif</p>
+          <small>© 2026 Vera Amelia</small>
+        </div>
+      </footer>
+    </>
+  );
+}

@@ -76,11 +76,13 @@ model Content {
 
 model Subscription {
   id        String             @id @default(cuid())
+  orderId   String?            @unique
   userId    String
   tierId    String
   status    SubscriptionStatus @default(ACTIVE)
   startsAt  DateTime           @default(now())
   expiresAt DateTime?
+  order    Order?             @relation(fields: [orderId], references: [id], onDelete: SetNull)
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   tier      Tier               @relation(fields: [tierId], references: [id], onDelete: Cascade)
 
@@ -106,6 +108,7 @@ model Order {
   updatedAt     DateTime      @updatedAt
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   tier          Tier          @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  subscription  Subscription?
 
   @@index([userId])
   @@index([tierId])
