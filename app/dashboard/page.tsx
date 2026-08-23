@@ -15,7 +15,7 @@ export default async function Dashboard() {
   const tiers = await prisma.tier.findMany({
     where: { active: true },
     orderBy: { level: 'asc' },
-    include: { contents: { where: { published: true }, take: 1, orderBy: { createdAt: 'desc' } } },
+    include: { contents: { where: { published: true }, take: 1, orderBy: { createdAt: 'desc' } }, _count: { select: { contents: true } } },
   });
 
   const subs = await prisma.subscription.findMany({
@@ -51,7 +51,7 @@ export default async function Dashboard() {
         <div className="product-list">
           {tiers.map((tier) => {
             const unlocked = tier.level <= effective;
-            const cover = tier.thumbnail || tier.contents[0]?.thumbnail || tier.contents[0]?.url;
+            const cover = tier.thumbnail;
             return <article key={tier.id} className={`product-card ${!unlocked ? 'locked-card' : ''}`}>
               <Link href={`/dashboard/level/${tier.slug}`} className="product-media-link" aria-label={`Lihat ${tier.name}`}>
                 <div className="product-media" style={{ background: `linear-gradient(145deg, ${tier.color}, #f6dce7)` }}>
@@ -59,6 +59,7 @@ export default async function Dashboard() {
                   {!unlocked && <div className="locked-overlay"><i className="fas fa-lock" /><span>Premium Only</span></div>}
                   <span className="level-chip">LEVEL {tier.level}</span>
                 </div>
+                <div className="content-count"><i className="fas fa-layer-group" /> {tier._count.contents} Konten</div>
               </Link>
               <div className="product-body">
                 <h3 className="serif">{tier.name.replace(`Level ${tier.level} — `, '')}</h3>
