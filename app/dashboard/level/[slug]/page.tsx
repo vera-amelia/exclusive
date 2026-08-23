@@ -73,15 +73,23 @@ export default async function LevelPage({ params }: { params: Promise<{ slug: st
         </div>
         {tier.contents.length === 0 ? <div className="empty-card"><i className="fas fa-images" /><h2>Belum ada konten</h2></div> :
           <div className="content-grid">
-            {tier.contents.map((c,i) => {
+            {tier.contents.map((c) => {
               const image = c.type === 'IMAGE';
-              const media = unlocked ? c.url : (c.thumbnail || (i === 0 && image ? c.url : ''));
+              // Every collection item uses its own Content.thumbnail as the preview.
+              // For videos, the thumbnail is the poster; the actual URL is only exposed after unlock.
+              const thumbnail = c.thumbnail || (image ? c.url : '');
               return <article key={c.id} className={`content-card ${!unlocked?'preview-locked':''}`}>
                 <div className="content-media">
-                  {media ? (image ? <img src={media} alt={c.title} /> : <video src={media} controls={unlocked} poster={c.thumbnail || undefined} />) : <div className="locked-media"><i className="fas fa-lock" /><span>Unlock dengan membeli level ini</span></div>}
-                  {!unlocked && i > 0 && <div className="content-lock"><i className="fas fa-lock" /></div>}
+                  {thumbnail ? (image ? (
+                    <img src={thumbnail} alt={c.title} />
+                  ) : (
+                    unlocked ? <video src={c.url} controls poster={thumbnail} /> : <img src={thumbnail} alt={c.title} />
+                  )) : (
+                    <div className="locked-media"><i className={`fas ${unlocked ? (image ? 'fa-image' : 'fa-video') : 'fa-lock'}`} /><span>{unlocked ? 'Thumbnail belum tersedia' : 'Unlock dengan membeli level ini'}</span></div>
+                  )}
+                  {!unlocked && <div className="content-lock"><i className="fas fa-lock" /></div>}
                 </div>
-                <div className="content-body"><h3 className="serif">{c.title}</h3>{c.description && <p>{c.description}</p>}<small>Ditambahkan {dateId(c.createdAt)}</small></div>
+                <div className="content-body"><h3 className="serif">{c.title}</h3>{c.description && <p>{c.description}</p>}<small>{image ? 'Foto' : 'Video'} · Ditambahkan {dateId(c.createdAt)}</small></div>
               </article>
             })}
           </div>}

@@ -383,3 +383,18 @@ header .container{width:min(460px,calc(100% - 32px))}.shadow-soft{box-shadow:0 1
 .detail-thumbs-locked .detail-thumb img{filter:blur(5px);transform:scale(1.08)}
 .public-locked-media > img{filter:blur(5px);transform:scale(1.05)}
 .public-locked-media .locked-overlay{background:rgba(38,29,37,.24)}
+/* Collection item thumbnails: every item has a preview; locked previews are blurred. */
+.detail-content-section .preview-locked .content-media {
+  overflow: hidden;
+}
+.detail-content-section .preview-locked .content-media img {
+  filter: blur(7px);
+  transform: scale(1.08);
+}
+.detail-content-section .preview-locked .content-lock {
+  z-index: 2;
+  background: rgba(35,25,33,.22);
+}
+.detail-content-section .preview-locked .content-lock i {
+  box-shadow: 0 6px 18px rgba(50,30,40,.12);
+}
