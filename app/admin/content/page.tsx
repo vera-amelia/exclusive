@@ -26,11 +26,25 @@ export default function AdminContent(){
 
   function handleThumbnailChange(e:React.ChangeEvent<HTMLInputElement>){
     const selected=e.target.files?.[0]||null;
-    if(!selected){setThumbFile(null);setThumbPreview(editingId?form.thumbnail:'');return}
+    if(!selected){setThumbFile(null);setThumbPreview(form.thumbnail||'');return}
     if(!selected.type.startsWith('image/')){alert('Thumbnail wajib berupa gambar (JPG, PNG, WEBP, dll).');e.target.value='';return}
     if(selected.size>10*1024*1024){alert('Ukuran thumbnail maksimal 10MB.');e.target.value='';return}
-    if(thumbPreview)URL.revokeObjectURL(thumbPreview);
+    if(thumbPreview && thumbPreview.startsWith('blob:'))URL.revokeObjectURL(thumbPreview);
     setThumbFile(selected);setThumbPreview(URL.createObjectURL(selected));
+  }
+
+  function handleThumbnailUrl(value:string){
+    setForm((x:any)=>({...x,thumbnail:value}));
+    if(!thumbFile){
+      if(thumbPreview && thumbPreview.startsWith('blob:'))URL.revokeObjectURL(thumbPreview);
+      setThumbPreview(value);
+    }
+  }
+
+  function clearThumbnailFile(){
+    setThumbFile(null);
+    if(thumbPreview && thumbPreview.startsWith('blob:'))URL.revokeObjectURL(thumbPreview);
+    setThumbPreview(form.thumbnail||'');
   }
 
   async function uploadToCloudinary(selected:File,resourceType:'image'|'video'){
@@ -58,11 +72,14 @@ export default function AdminContent(){
 
   async function save(e:any){
     e.preventDefault();
-    if(!thumbFile&&!form.thumbnail){alert('Thumbnail wajib ada. Upload thumbnail sebelum menyimpan konten.');return}
+    if(!thumbFile&&!form.thumbnail.trim()){alert('Thumbnail wajib ada. Masukkan URL gambar atau upload thumbnail.');return}
+    if(form.thumbnail.trim()){
+      try{new URL(form.thumbnail.trim())}catch{alert('URL thumbnail tidak valid.');return}
+    }
     if(!file&&!form.url){alert('Upload file konten atau masukkan URL media.');return}
     setBusy(true);
     try{
-      const thumbnail=thumbFile?await uploadToCloudinary(thumbFile,'image'):form.thumbnail;
+      const thumbnail=thumbFile?await uploadToCloudinary(thumbFile,'image'):form.thumbnail.trim();
       const url=file?await uploadToCloudinary(file,file.type.startsWith('video/')?'video':'image'):form.url;
       const payload={...form,url,thumbnail};
       const endpoint=editingId?`/api/admin/content/${editingId}`:'/api/admin/content';
@@ -90,9 +107,15 @@ export default function AdminContent(){
 
         <div className="glass" style={{padding:14,borderRadius:14,border:'1px solid rgba(184,108,150,.25)'}}>
           <div style={{fontWeight:700,marginBottom:5}}>Thumbnail Konten <span style={{color:'#b86c96'}}>* Wajib</span></div>
-          <div style={{fontSize:12,color:'#8c7c85',marginBottom:10}}>{editing?'Pilih gambar baru untuk mengganti thumbnail, atau biarkan thumbnail lama tetap digunakan.':'Upload gambar yang akan tampil di Isi Koleksi. Maksimal 10MB.'}</div>
-          <input type="file" accept="image/*" onChange={handleThumbnailChange} required={!editing&&!form.thumbnail}/>
-          {thumbPreview&&<div style={{marginTop:12}}><div style={{fontSize:12,color:'#8c7c85',marginBottom:6}}>{thumbFile?'Preview thumbnail baru:':'Thumbnail saat ini:'}</div><div style={{width:'100%',maxWidth:320,aspectRatio:'16/9',borderRadius:12,overflow:'hidden',background:'#f3edf1'}}><img src={thumbPreview} alt="Preview thumbnail" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/></div></div>}
+          <div style={{fontSize:12,color:'#8c7c85',marginBottom:10}}>Gunakan salah satu: masukkan URL gambar atau upload gambar dari komputer. Jika keduanya diisi, upload file akan diprioritaskan. Maksimal 10MB untuk upload.</div>
+          <input className="input" type="url" placeholder="https://example.com/thumbnail.jpg" value={form.thumbnail} onChange={e=>handleThumbnailUrl(e.target.value)}/>
+          <div style={{fontSize:12,color:'#8c7c85',margin:'10px 0 6px'}}>Atau upload thumbnail:</div>
+          <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+            <input type="file" accept="image/*" onChange={handleThumbnailChange}/>
+            {thumbFile&&<button type="button" className="btn btn-ghost" onClick={clearThumbnailFile}>Pakai URL</button>}
+          </div>
+          {!form.thumbnail&&!thumbFile&&!editing&&<div style={{fontSize:12,color:'#b86c96',marginTop:8}}>Thumbnail wajib diisi melalui URL atau upload file.</div>}
+          {thumbPreview&&<div style={{marginTop:12}}><div style={{fontSize:12,color:'#8c7c85',marginBottom:6}}>{thumbFile?'Preview thumbnail upload:':'Preview thumbnail URL:'}</div><div style={{width:'100%',maxWidth:320,aspectRatio:'16/9',borderRadius:12,overflow:'hidden',background:'#f3edf1'}}><img src={thumbPreview} alt="Preview thumbnail" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} onError={e=>{e.currentTarget.style.display='none'}}/></div></div>}
         </div>
 
         <div>
