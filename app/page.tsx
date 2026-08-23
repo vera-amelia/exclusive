@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import { prisma } from '@/lib/prisma';
 import { rupiah } from '@/lib/format';
-import BuyButton from '@/components/BuyButton';
 
 export default async function Home() {
   const tiers = await prisma.tier.findMany({
@@ -47,20 +46,22 @@ export default async function Home() {
 
           <div className="product-list">
             {tiers.map((tier) => {
-              const cover = tier.contents[0]?.thumbnail || tier.contents[0]?.url;
+              const cover = tier.thumbnail;
               const displayName = tier.name.replace(`Level ${tier.level} — `, '');
               return (
                 <article key={tier.id} className="product-card">
-                  <div className="product-media" style={{ background: `linear-gradient(145deg, ${tier.color}, #f6dce7)` }}>
-                    {cover ? (
-                      <img src={cover} alt="" />
-                    ) : (
-                      <div className="media-placeholder"><span>V</span></div>
-                    )}
-                    <div className="media-overlay" />
-                    <span className="product-badge"><i className="fas fa-star" /> {tier.level === 1 ? 'New Drop' : tier.level === 4 ? 'Limited' : 'Premium'}</span>
-                    <span className="level-chip">LEVEL {tier.level}</span>
-                  </div>
+                  <Link href={`/dashboard/level/${tier.slug}`} className="product-media-link" aria-label={`Lihat ${displayName}`}>
+                    <div className="product-media" style={{ background: `linear-gradient(145deg, ${tier.color}, #f6dce7)` }}>
+                      {cover ? (
+                        <img src={cover} alt="" />
+                      ) : (
+                        <div className="media-placeholder"><span>V</span></div>
+                      )}
+                      <div className="media-overlay" />
+                      <span className="product-badge"><i className="fas fa-star" /> {tier.level === 1 ? 'New Drop' : tier.level === 4 ? 'Limited' : 'Premium'}</span>
+                      <span className="level-chip">LEVEL {tier.level}</span>
+                    </div>
+                  </Link>
                   <div className="product-body">
                     <h3 className="serif">{displayName}</h3>
                     <p>{tier.description}</p>
@@ -68,7 +69,7 @@ export default async function Home() {
                       <strong>{rupiah(tier.price)}</strong>
                       <span>/ 30 hari</span>
                     </div>
-                    <BuyButton tierId={tier.id} label="Beli Sekarang" />
+                    <Link className="buy-button link-button" href={`/dashboard/level/${tier.slug}`}>Beli Sekarang <i className="fas fa-arrow-right" /></Link>
                   </div>
                 </article>
               );
