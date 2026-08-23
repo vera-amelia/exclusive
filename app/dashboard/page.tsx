@@ -6,7 +6,6 @@ import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth';
 import { getEffectiveTierOrder } from '@/lib/access';
 import { dateId, rupiah } from '@/lib/format';
-import BuyButton from '@/components/BuyButton';
 
 export default async function Dashboard() {
   const user = await getSessionUser();
@@ -52,17 +51,20 @@ export default async function Dashboard() {
         <div className="product-list">
           {tiers.map((tier) => {
             const unlocked = tier.level <= effective;
-            const cover = tier.contents[0]?.thumbnail || tier.contents[0]?.url;
+            const cover = tier.thumbnail || tier.contents[0]?.thumbnail || tier.contents[0]?.url;
             return <article key={tier.id} className={`product-card ${!unlocked ? 'locked-card' : ''}`}>
-              <div className="product-media" style={{ background: `linear-gradient(145deg, ${tier.color}, #f6dce7)` }}>
-                {cover ? <img src={cover} alt="" /> : <div className="media-placeholder"><span>V</span></div>}
-                {!unlocked && <div className="locked-overlay"><i className="fas fa-lock" /><span>Premium Only</span></div>}
-                <span className="level-chip">LEVEL {tier.level}</span>
-              </div>
+              <Link href={`/dashboard/level/${tier.slug}`} className="product-media-link" aria-label={`Lihat ${tier.name}`}>
+                <div className="product-media" style={{ background: `linear-gradient(145deg, ${tier.color}, #f6dce7)` }}>
+                  {cover ? <img src={cover} alt="" /> : <div className="media-placeholder"><span>V</span></div>}
+                  {!unlocked && <div className="locked-overlay"><i className="fas fa-lock" /><span>Premium Only</span></div>}
+                  <span className="level-chip">LEVEL {tier.level}</span>
+                </div>
+              </Link>
               <div className="product-body">
                 <h3 className="serif">{tier.name.replace(`Level ${tier.level} — `, '')}</h3>
                 <p>{unlocked ? 'Akses terbuka untuk akun kamu.' : 'Upgrade ke level ini untuk membuka koleksi.'}</p>
-                {unlocked ? <Link className="buy-button link-button" href={`/dashboard/level/${tier.slug}`}>Buka Koleksi <i className="fas fa-arrow-right" /></Link> : <><div className="price-row"><strong>{rupiah(tier.price)}</strong><span>/ 30 hari</span></div><BuyButton tierId={tier.id} label="Beli Sekarang" /></>}
+                <div className="price-row"><strong>{rupiah(tier.price)}</strong><span>/ 30 hari</span></div>
+                <Link className="buy-button link-button" href={`/dashboard/level/${tier.slug}`}>{unlocked ? 'Lihat Koleksi' : 'Beli Sekarang'} <i className="fas fa-arrow-right" /></Link>
               </div>
             </article>;
           })}

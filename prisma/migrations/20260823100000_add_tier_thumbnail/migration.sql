@@ -1,0 +1,1 @@
+ALTER TABLE "Tier" ADD COLUMN IF NOT EXISTS "thumbnail" TEXT;

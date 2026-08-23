@@ -50,6 +50,7 @@ model Tier {
   description   String
   price         Int
   color         String      @default("#d98bb3")
+  thumbnail     String?
   active        Boolean        @default(true)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
