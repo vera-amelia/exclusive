@@ -13,7 +13,7 @@ export default async function LevelPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const tier = await prisma.tier.findUnique({
     where: { slug },
-    include: { contents: { where: { published: true }, orderBy: { createdAt: 'desc' } }, _count: { select: { subscriptions: true } } }
+    include: { contents: { where: { published: true }, orderBy: { createdAt: 'desc' } }, _count: { select: { subscriptions: true, contents: true } } }
   });
   if (!tier) return <><Header /><main className="site-shell empty-state">Level tidak ditemukan.</main></>;
 
@@ -45,6 +45,7 @@ export default async function LevelPage({ params }: { params: Promise<{ slug: st
       <section className="detail-info">
         <span className="detail-badge">✨ New Drop</span>
         <span className="section-kicker">LEVEL {tier.level}</span>
+        <div className="detail-content-count"><i className="fas fa-layer-group" /> {tier._count.contents} Konten</div>
         <h1 className="serif">{tier.name.replace(`Level ${tier.level} — `, '')}</h1>
         <div className="detail-price">{rupiah(tier.price)}</div>
         {buyerCount > 0 && <div className="buyer-count"><span>🔥</span> {buyerCount} orang sudah membeli</div>}

@@ -15,6 +15,7 @@ export default async function Home() {
         take: 2,
         orderBy: { createdAt: 'desc' },
       },
+      _count: { select: { contents: true } },
     },
   });
 
@@ -61,6 +62,7 @@ export default async function Home() {
                       <span className="product-badge"><i className="fas fa-star" /> {tier.level === 1 ? 'New Drop' : tier.level === 4 ? 'Limited' : 'Premium'}</span>
                       <span className="level-chip">LEVEL {tier.level}</span>
                     </div>
+                    <div className="content-count"><i className="fas fa-layer-group" /> {tier._count.contents} Konten</div>
                   </Link>
                   <div className="product-body">
                     <h3 className="serif">{displayName}</h3>
