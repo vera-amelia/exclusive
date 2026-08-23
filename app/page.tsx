@@ -52,13 +52,13 @@ export default async function Home() {
               return (
                 <article key={tier.id} className="product-card">
                   <Link href={`/dashboard/level/${tier.slug}`} className="product-media-link" aria-label={`Lihat ${displayName}`}>
-                    <div className="product-media" style={{ background: `linear-gradient(145deg, ${tier.color}, #f6dce7)` }}>
+                    <div className="product-media public-locked-media" style={{ background: `linear-gradient(145deg, ${tier.color}, #f6dce7)` }}>
                       {cover ? (
                         <img src={cover} alt="" />
                       ) : (
                         <div className="media-placeholder"><span>V</span></div>
                       )}
-                      <div className="media-overlay" />
+                      <div className="media-overlay" /><div className="locked-overlay"><i className="fas fa-lock" /><span>Premium Only</span></div>
                       <span className="product-badge"><i className="fas fa-star" /> {tier.level === 1 ? 'New Drop' : tier.level === 4 ? 'Limited' : 'Premium'}</span>
                       <span className="level-chip">LEVEL {tier.level}</span>
                     </div>

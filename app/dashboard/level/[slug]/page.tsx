@@ -30,11 +30,11 @@ export default async function LevelPage({ params }: { params: Promise<{ slug: st
       <Link href="/dashboard" className="back-link"><i className="fas fa-arrow-left" /> Kembali</Link>
 
       <section className="detail-gallery">
-        <div className="detail-main-media" style={{background:`linear-gradient(145deg, ${tier.color || '#d98bb3'}, #f6dce7)`}}>
+        <div className={`detail-main-media ${!unlocked ? 'detail-locked-media' : ''}`} style={{background:`linear-gradient(145deg, ${tier.color || '#d98bb3'}, #f6dce7)`}}>
           {cover ? <img src={cover} alt={tier.name} /> : <div className="media-placeholder"><span>V</span></div>}
           {!unlocked && <div className="detail-premium"><i className="fas fa-lock" /> Premium Only</div>}
         </div>
-        {preview.length > 1 && <div className="detail-thumbs">
+        {preview.length > 1 && <div className={`detail-thumbs ${!unlocked ? 'detail-thumbs-locked' : ''}`}>
           {preview.map((c,i)=><div key={c.id} className={`detail-thumb ${i===0?'active':''}`}>
             <img src={c.thumbnail || c.url} alt="" />
           </div>)}
